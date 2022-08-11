@@ -1,0 +1,166 @@
+<html>
+<head>
+<style>
+body { margin: 0; }
+#canvas { width: 100%; height: 100%; object-fit: contain; }
+</style>
+</head>
+<body>
+Open file: <input type="file" id="fileUpload" accept="image/*" />
+<br>
+<input type="checkbox" id="color_checkbox">Color
+<br>
+Size: <input type="number" id="size" value="1024">
+<br>
+<input type="checkbox" id="fit_image" checked> Fit Image
+<br>
+<button id="redraw">Redraw</button>
+<br>
+<canvas id="canvas" />
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const buffer = document.createElement('canvas').getContext('2d');
+const input = document.getElementById('fileUpload')
+const color_checkbox = document.getElementById('color_checkbox');
+const size_input = document.getElementById('size');
+const fit_input = document.getElementById('fit_image');
+const redraw_input = document.getElementById('redraw');
+
+let W = size_input.value;
+let H = size_input.value;
+
+let img1;
+let img_w;
+let img_h;
+let max_gx;
+let max_gy;
+let data;
+let r;
+let g;
+let b;
+let l;
+
+canvas.width = W;
+canvas.height = H;
+
+redraw_input.onclick = () => generate();
+
+fit_image.onchange = () => {
+  if (fit_image.checked) {
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+  } else {
+    canvas.style.width = 'auto';
+    canvas.style.height = 'auto';
+  }
+}
+
+size_input.onchange = () => {
+  W = size_input.value;
+  H = size_input.value;
+  canvas.width = W;
+  canvas.height = H;
+  
+  if (typeof img1 !== 'undefined') {
+    img_w = img1.width;
+    img_h = img1.height;
+    max_gx = img_w;
+    max_gy = img_h;
+    let aspect = 1.0*img_w/img_h;
+    canvas.width = canvas.height*aspect;
+    W = canvas.width;
+    console.log(W + ' ' + H);
+  }
+};
+      
+input.onchange = function() {
+  let promise = new Promise(resolve => {
+    img1 = new Image();
+    
+    img1.onload = function() {
+      img_w = img1.width;
+      img_h = img1.height;
+      max_gx = img_w;
+      max_gy = img_h;
+      let aspect = 1.0*img_w/img_h;
+      canvas.width = canvas.height*aspect;
+      W = canvas.width;
+      console.log(W + ' ' + H);
+      
+      console.log(`img_w: ${img_w} img_h: ${img_h}`);
+      buffer.canvas.width = img_w;
+      buffer.canvas.height = img_h;
+      buffer.drawImage(img1, 0, 0);
+      ctx.drawImage(img1, 0, 0);
+      URL.revokeObjectURL(img1.src);
+      resolve();
+    };
+    
+    img1.src = URL.createObjectURL(input.files[0])
+  });
+  
+  //await promise;
+  promise.then(generate);
+  //generate();
+}
+
+function generate() {    
+  data = buffer.getImageData(0, 0, img_w, img_h);
+  console.log(data);
+  
+  ctx.beginPath();
+  ctx.rect(0, 0, W, H);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+      
+  ctx.strokeStyle = 'black';
+  let use_color = color_checkbox.checked;
+  for (let gx = 0; gx < max_gx; gx++) {
+    for (let gy = 0; gy < max_gy; gy++) {   
+      let offset = 4*(gy*max_gx + gx);
+      r = data.data[offset];
+      g = data.data[offset + 1];
+      b = data.data[offset + 2];
+      
+      l = 255 - (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+      l = Math.round(Math.exp(l/46.0));
+      
+      if (use_color) {
+        ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+      }
+      ctx.beginPath();
+      for (let i = 0; i < l; i++) {
+        if (i > 256) {
+          break;
+        }
+        xx = Math.random();
+        yy = Math.random();
+        [X0, Y0] = grid_offset(xx, yy, gx, gy, W/max_gx, H/max_gy);
+        xx = Math.random();
+        yy = Math.random();
+        [X1, Y1] = grid_offset(xx, yy, gx, gy, W/max_gx, H/max_gy);
+        
+        ctx.moveTo(X0, Y0);
+        ctx.lineTo(X1, Y1);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+function grid_offset(x, y, gx, gy, gw, gh) {
+  let X = (gx + x) * gw;
+  let Y = (gy + y) * gh;
+  return [X,Y];
+}
+
+function line(context, x0, y0, x1, y1) {
+  context.beginPath();
+  context.moveTo(x0, y0);
+  context.lineTo(x1, y1);
+  context.stroke();
+}
+</script>
+</body>
+</html>
