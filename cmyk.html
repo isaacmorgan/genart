@@ -1,0 +1,146 @@
+<html>
+<head>
+<style>
+:root {
+  --url: url("test.jpg");
+  --lum-inv-r: rgb(179, 179, 179);
+  --lum-inv-g: rgb(105, 105, 105);
+  --lum-inv-b: rgb(227, 227, 227);
+}
+
+body { 
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.grid-item {
+  grid-area: 1 / -1 / 1 / -1;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.invert {
+  filter: invert();
+}
+
+.lighten {
+  mix-blend-mode: lighten;
+}
+
+.dodge {
+  mix-blend-mode: color-dodge;
+}
+
+.multiply {
+  mix-blend-mode: multiply;
+}
+
+img {
+  content: var(--url);
+  visibility: hidden;
+}
+
+.cx {
+  background-image: linear-gradient(aqua, aqua), var(--url);
+  background-blend-mode: lighten, normal;
+}
+
+.mx {
+  background-image: linear-gradient(magenta, magenta), var(--url);
+  background-blend-mode: lighten, normal;
+}
+
+.yx {
+  background-image: linear-gradient(yellow, yellow), var(--url);
+  background-blend-mode: lighten, normal;
+}
+
+.kr {
+  background-image: linear-gradient(var(--lum-inv-r), var(--lum-inv-r)), linear-gradient(white, white), linear-gradient(red, red), var(--url);
+  background-blend-mode: color-dodge, color, multiply, normal;
+}
+.kg {
+  background-image: linear-gradient(var(--lum-inv-g), var(--lum-inv-g)), linear-gradient(white, white), linear-gradient(lime, lime), var(--url);
+  background-blend-mode: color-dodge, color, multiply, normal;
+}
+.kb {
+  background-image: linear-gradient(var(--lum-inv-b), var(--lum-inv-b)), linear-gradient(white, white), linear-gradient(blue, blue), var(--url);
+  background-blend-mode: color-dodge, color, multiply, normal;
+}
+
+.c {
+  left: 0;
+}
+
+.m {
+  left: 20%;
+}
+
+.y {
+  left: 40%;
+}
+
+.k {
+  left: 60%;
+}
+
+.c, .m, .y, .k {
+  transition: left 2s ease;
+}
+
+body:hover .c, body:hover .m, body:hover .y, body:hover .k {
+  left: 0;
+}
+
+</style>
+</head>
+<body>
+  <div class="c absolute multiply grid">
+    <img class="grid-item">
+    <div class="cx grid-item"></div>
+    <div class="k dodge invert grid grid-item">
+      <img class="grid-item">
+      <div class="kr lighten grid-item"></div>
+      <div class="kg lighten grid-item"></div>
+      <div class="kb lighten grid-item"></div>
+    </div>
+  </div>
+
+
+  <div class="m absolute multiply grid">
+    <img class="grid-item">
+    <div class="mx grid-item"></div>
+    <div class="k dodge invert grid grid-item">
+      <img class="grid-item">
+      <div class="kr lighten grid-item"></div>
+      <div class="kg lighten grid-item"></div>
+      <div class="kb lighten grid-item"></div>
+    </div>
+  </div>
+
+  <div class="y absolute multiply grid">
+    <img class="grid-item">
+    <div class="yx grid-item"></div>
+    <div class="k dodge invert grid grid-item">
+      <img class="grid-item">
+      <div class="kr lighten grid-item"></div>
+      <div class="kg lighten grid-item"></div>
+      <div class="kb lighten grid-item"></div>
+    </div>
+  </div>
+
+  <div class="k absolute multiply grid">
+    <img class="grid-item">
+    <div class="kr lighten grid-item"></div>
+    <div class="kg lighten grid-item"></div>
+    <div class="kb lighten grid-item"></div>
+  </div>
+</body>
+</html>
