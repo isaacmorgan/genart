@@ -77,7 +77,7 @@ def constrain_crop(crop, img_size):
         d = crop[2] - img_size[0]
         crop = (crop[0] - d, crop[1], crop[2] - d, crop[3])
     if crop[3] > img_size[1]:
-        d = img_size[1] - crop[3]
+        d = crop[3] - img_size[1]
         crop = (crop[0], crop[1] - d, crop[2], crop[3] - d)
     return crop
 
