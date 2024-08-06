@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foofle!</title>
+  <style>
+  #search_bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #foofle_title {
+    font-size: 72px;
+    text-shadow: 4px 4px 4px gray;
+    margin: 0;
+  }
+  #foofle_title > span:nth-child(3n+1) {
+    color: blue;
+  }
+  #foofle_title > span:nth-child(4n+2) {
+    color: red;
+  }
+  #foofle_title > span:nth-child(3) {
+    color: yellow;
+  }
+  #foofle_title > span:nth-child(5) {
+    color: green;
+  }
+  
+  input {
+    width: 40em;
+    max-width: 100%;
+  }
+  
+  #main {
+    padding: 10px 5%;
+  }
+  
+  .result_div {
+    margin: 1em 0;
+  }
+  
+  .result_div > p {
+    margin: 0.5em 0;
+  }
+  </style>
+</head>
+
+<body>
+<div id="main">
+</div>
+</body>
+
+
+<template id="result_item">
+<div class="result_div">
+<a href="#" onclick="click_link(this)"></a>
+<br>
+<p>
+</div>
+</template>
+
+<template id="homepage">
+<div id="search_bar">
+<h1 id="foofle_title"><span>F</span><span>o</span><span>o</span><span>f</span><span>l</span><span>e</span><span>!</span></h1>
+<p>Search the Foofleverse using Foofle!</p>
+<div><button onclick="click_back()">Back</button>
+<input type="search">
+<button onclick="click_go()">Go</button>
+</div>
+</div>
+<article></article>
+</template>
+
+<template id="webpage">
+<h1></h1>
+<article></article>
+</template>
+
+<template id="pagination">
+<div id="page_nav">
+<a>1</a><a>2</a><a>3</a><a>4</a><a>5</a><a>6</a><a>7</a><a>8</a><a>9</a><a>10</a>
+</div>
+</template>
+
+  <script>
+  var main_hist = [];
+  var paged_hist = [];
+  if ("content" in document.createElement("template")) {
+  const body = document.querySelector("body");
+  const main = document.querySelector("#main");
+  const homepage = document.querySelector("#homepage");
+  const result_item = document.querySelector("#result_item");
+  const pagination = document.querySelector("#pagination");
+  const clone = homepage.content.cloneNode(true);
+  body.insertBefore(clone, main);
+  }
+  
+  function click_go() {
+    var OPENROUTER_API_KEY = "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";
+    const search_term = document.querySelector("input").value;
+    fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "model": "qwen/qwen-2-7b-instruct:free",
+        "messages": [
+          {"role": "user", "content": `Give me a list of 20 websites that might be useful for answering my query along with a short description of each website. Print the title of each website, newline, the description of that website, newline, and so on. Print nothing else, don't say Description or anything like that. The query is: ${search_term}`},
+        ],
+      })
+    }).then(res => {
+      console.log(res);
+      return res.text();
+    }).then(res => {
+      console.log(res);
+      const titles = JSON.parse(res).choices[0].message.content.split(new RegExp('\n+'));
+      
+      const main = document.querySelector("#main");
+      main.innerHTML = '';
+      
+      for (let i = 0; i < titles.length/2; i += 2) {
+        let item = result_item.content.cloneNode(true);
+        item.querySelector("a").innerText = titles[i];
+        item.querySelector("p").innerText = titles[i+1];
+        main.appendChild(item);
+      }
+    });
+    
+    //TODO: WHY NO WORK?
+    body.appendChild(pagination.cloneNode(true));
+  }
+  
+  function click_link(event) {
+    console.log(event);
+    const title = event.textContent;
+    console.log(title);
+    const description = event.nextElementSibling.nextElementSibling.textContent;
+    console.log(description);
+    const main = document.querySelector("#main");
+    let webpage = document.querySelector("#webpage").content.cloneNode(true);
+    
+    var OPENROUTER_API_KEY = "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";
+    const search_term = document.querySelector("input").value;
+    fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "model": "qwen/qwen-2-7b-instruct:free",
+        "messages": [
+          {"role": "user", "content": `Give me the content for a website based on the title and description of the website. The content should only include basic HTML tags, and should never include the 'body' or 'html' tags. The title is: ${title}. And the description is: ${description}.`},
+        ],
+      })
+    }).then(res => {
+      console.log(res);
+      return res.text();
+    }).then(res => {      
+      const website_body = JSON.parse(res).choices[0].message.content;
+      //console.log(webpage);
+      webpage.querySelector("h1").innerText = title;
+      webpage.querySelector("article").innerHTML = website_body;
+      main_hist.push(main.innerHTML);
+      main.innerHTML = '';
+      main.appendChild(webpage);
+    });
+  }
+  
+  function click_back() {
+    main.innerHTML = '';
+    main.innerHTML = main_hist.pop();
+  }
+  </script>
+</html>
