@@ -110,7 +110,7 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "qwen/qwen-2-7b-instruct:free",
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
         "messages": [
           {"role": "user", "content": `Give me a list of 20 websites that might be useful for answering my query along with a short description of each website. Print the title of each website, newline, the description of that website, newline, and so on. Print nothing else, don't say Description or anything like that. The query is: ${search_term}`},
         ],
@@ -155,7 +155,7 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "qwen/qwen-2-7b-instruct:free",
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
         "messages": [
           {"role": "user", "content": `Give me the content for a website based on the title and description of the website. The content should only include basic HTML tags, and should never include the 'body' or 'html' tags. The title is: ${title}. And the description is: ${description}.`},
         ],
